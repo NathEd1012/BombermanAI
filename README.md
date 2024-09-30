@@ -1,6 +1,5 @@
 # Our Bomberman AI 
-## (Kamikaze and Baby Penguin)
-
+#### (Kamikaze and Baby Penguin)
 <p align="center">
     <img width="311" alt="Bomberman" src="https://github.com/user-attachments/assets/e4700335-45d9-4f13-a872-04ca10d74abd">
 </p>
