@@ -10,5 +10,6 @@ manageable steps. The final DQN model, which proved to be the better-performing 
 used a decaying epsilon-greedy policy and an experience replay in the training, achieving
 effective gameplay in some of the considered scenarios.
 
-<img width="511" alt="Bomberman" src="https://github.com/user-attachments/assets/e4700335-45d9-4f13-a872-04ca10d74abd">
+<centering>
+<img width="311" alt="Bomberman" src="https://github.com/user-attachments/assets/e4700335-45d9-4f13-a872-04ca10d74abd">
 
