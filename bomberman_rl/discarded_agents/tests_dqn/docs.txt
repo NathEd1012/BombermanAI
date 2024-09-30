@@ -1,0 +1,50 @@
+Documentation for tests using a DQN model.
+
+# Take the basic feature architecture of the existing tests q-learning model and adapt it to a deep neural network
+
+1. State representation:
+
+    The state_to_faetures() vector in tests is already vector shaped, which means we can use it
+    on a neural network. We will need to adapt it probably for pytorch implementation with tensors.
+
+    We still need to find the most meaningful features to how the agent can learn. Need systematic 
+    way of improving this. Maybe in a dropout competition?
+
+2. Network architecture
+
+    Need an input layer with dimension = len(features).
+    Hidden layer
+    Output layer with deimension = len(ACTIONS)
+
+    Use Adam (Adaptive Moment Estimation) as "Optimizer", which adjusts the learning rate dynamically.
+    It's also supposed to be computationally efficient and good for sparse rewards.
+
+3. Action selection
+
+    Epsilon-greedy policy, probably with an exponential decay with training iterations or something.
+
+4. Experience Replay
+
+    Learning stability by randomly sampling from ReplayMemory, a buffer of past experiences.
+    Unbias sequential events.
+
+5. Target Network
+
+    Main network, updated during training. Target Network, Main network but updated less regularly.
+
+6. Loss function
+
+    Loss for Bellman equation:
+
+    \text{Loss} = (r + \gamma \cdot \max_{a{\prime}} Q_{\text{target}}(s{\prime}, a{\prime}) - Q_{\text{main}}(s, a))^2
+
+    Use at first MSE Loss because it's basically a regression problem, which is very optimized computationally. Other losses
+    like the Huber Loss are more robust against outliers
+
+7. Reward design
+
+    Should shape rewards during training to first learn survival skills, i.e. moving away from bombs,
+    then move on to crates and coins
+    and finally enemies and play strategy
+
+8. Hyperparameters

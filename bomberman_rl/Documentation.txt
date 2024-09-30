@@ -1,0 +1,77 @@
+# Understanding the code
+
+## game_state
+
+game_state is a dictionary with the following keys and exemplary values:
+
+round: 1,
+step: 44,
+field:
+    [[-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1]
+    [-1  0  0  0  0  0  0  0  0  1  0  1  1  1  0  0 -1]
+    [-1  0 -1  0 -1  0 -1  1 -1  1 -1  1 -1  1 -1  0 -1]
+    [-1  0  1  0  1  0  1  1  0  1  1  1  1  1  1  0 -1]
+    [-1  0 -1  0 -1  0 -1  0 -1  1 -1  0 -1  0 -1  0 -1]
+    [-1  0  0  0  0  0  1  1  1  1  1  1  1  1  1  1 -1]
+    [-1  0 -1  0 -1  1 -1  1 -1  0 -1  1 -1  0 -1  1 -1]
+    [-1  0  1  0  1  1  1  0  1  1  1  0  0  1  1  0 -1]
+    [-1  0 -1  1 -1  1 -1  1 -1  0 -1  1 -1  0 -1  0 -1]
+    [-1  0  0  0  1  0  0  1  1  1  1  1  1  0  1  0 -1]
+    [-1  0 -1  0 -1  1 -1  0 -1  0 -1  1 -1  0 -1  0 -1]
+    [-1  0  0  0  1  1  1  0  1  1  0  0  0  0  0  0 -1]
+    [-1  0 -1  0 -1  1 -1  1 -1  1 -1  0 -1  0 -1  0 -1]
+    [-1  0  1  0  1  0  1  1  1  0  1  1  1  0  1  0 -1]
+    [-1  0 -1  0 -1  1 -1  1 -1  0 -1  1 -1  0 -1  0 -1]
+    [-1  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0 -1]
+    [-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1]],
+self: ('tests', 0, False, (3, 15)), # ('agent_name', current_score, bool: can place bombs, current coordinates)
+others: [('rule_based_agent_0', 0, True, (11, 12)), ('rule_based_agent_1', 1, True, (5, 2)), ('rule_based_agent_2', 1, False, (5, 4))],
+bombs: [((3, 15), 1)], # Coordinates: (y, x), # Countdown: 1
+coins: [(4, 5), (15, 8), (2, 5)]: ,
+user_input: None,
+explosion_map:   
+    x ->
+y   [[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+|   [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+v   [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. (1.) 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+    [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]],
+
+game_state can be accessed inside callbacks -> act, state_to_features
+
+## visualize.py
+
+the file visualize.py is a tool to visualize at a quick glance the learning behavior of our agent by displaying the 
+statistics that were tracked during training. The statistics available are
+
+Start Timestamp,Elapsed Time (s),Rounds Played,Score,Total Reward,Loss,BOMB_DROPPED,BOMB_EXPLODED,COIN_COLLECTED,COIN_FOUND,CRATE_DESTROYED,GOT_KILLED,INVALID_ACTION,KILLED_OPPONENT,KILLED_SELF,MOVED_DOWN,MOVED_LEFT,MOVED_RIGHT,MOVED_UP,OPPONENT_ELIMINATED,SURVIVED_ROUND,WAITED,UP,RIGHT,DOWN,LEFT,WAIT,BOMB
+
+and they can be displayed for an individual agent or as a comparison of two agents, as long as they have the file training_stats.csv 
+in their corresponding folder.
+
+For an individual agent, they can be called as 
+
+    python visualze.py --agent1 agent_name --stats "stat_1" "stat_2 (optional)" "etc..."
+
+For example, to check how often the agent performs an invalid action or waits, check
+
+    python visualize.py --agent1 dqn_variant_one --stats "INVALID_ACTION" "WAITED"
+
+For two agents, the same thing can be done:
+
+    python visualize.py --agent1 dqn_variant_one --agent2 dqn_variant_two --stats "INVALID_ACTION" "WAITED"
+
+The statistics in training_stats.csv are counted every LOG_FREQUENCY steps and summed over the LOG_FREQUENCY training rounds. In
+visualize.py, they are normalized to an average value per round.

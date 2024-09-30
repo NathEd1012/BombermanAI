@@ -1,0 +1,539 @@
+Documentation for Variant Two of the DQN:
+
+In an elimination type matchup, we will select different features and train them on Variant One and Variant Two.
+The features which lead to the best learned behavior will move on to the next stage of training.
+
+On Phase 1: We want to teach the agent to walk and to avoid walking directly into walls. Therefore, we need to provide 
+it with knowledge about the immediate neighboring walls and punish it for performing invalid actions. We will monitor the 
+amount of Invalid Actions the agent performs with consecutive training iterations. For this first stage, we remove 'BOMB'
+from the possible actions, to avoid having that as an Invalid Action.
+
+    ################## Variant 2.1.1
+
+    The features vector is a four dimensional vector which only indicates whether a move up, right, down, left is valid, i.e.
+    if game_state['field'] == 0 for that position. 
+
+    In the first variant, we will punish Invalid Action with -1 and reward any kind of movement with 0.02, so that the agent 
+    learns to explore. We will need to take precaution with rewarding movement, as we don't want to train the agent to explore 
+    recklessly in the future. We will also punish waiting with -0.1 to keep the agent from staying in the same tile throughout
+    the game.
+
+    To train the agent, we created a custom scenario 
+
+        "mostly-empty": {
+        "CRATE_DENSITY": 0.2,
+        "COIN_COUNT": 0
+        }
+
+    to account for crates, but also permit somewhat free exploration. With the given feature, crates are handled the same way as 
+    walls.
+
+    The rewards are set as:
+
+        e.INVALID_ACTION: -1,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        e.WAITED: -0.05,
+
+    ---------> Results: 
+        Agent seems to convert to a strategy where it doesn't try going into walls, however, it gets stuck in a loop of
+        right-left or up-down, since it doesn't have any incentive to explore.
+
+        #### First training session: 2024-09-10 21:41:40 (stats/ts-2-1-1-1.csv)
+        dqn_variant_two appears to converge much faster to the predicted 14.4 invalid moves per round dictated by our 
+        greedy epsilon strategy. After less than 100 training iterations, it has learned not to crash into walls.
+
+        We delete the model (models/2-1-1-1) and begin again to confirm that this is not an anomaly.
+
+        #### Second training session: 2024-09-10 22:39:56 (stats/ts-2-1-1-2.csv)
+        Initially, it appears as though the agent is performing random actions throughout and crashing all the time into
+        walls, completely contradicting the smooth behavior it showed in the first session. After 1000 training rounds, 
+        it converges for a while to a suboptimal policy at around 30 invalid actions per round. A short while later it 
+        converges to the expected ~14.
+
+        Contrary to the first session, at no point in the 2400 training rounds does dqn_v2 learn not to wait.
+
+        We delete the model (models/2-1-1-2.pt) and begin again for peace of mind.
+
+        #### Third training session: 2024-09-10 23:04:23 (stats/ts-2-1-1-3.csv)
+        dqn_v2 appears to learn quickly, that invalid actions are bad (after 100 rounds), but isn't that convinced. The 
+        value fluctuates drastically and after 300 rounds, it skyrockets again for another 100 rounds before it settles on the optimal policy.
+        However, it learns to WAIT for every move.
+
+        We delete the model (models/2-1-1-3.pt) and begin again for peace of mind.
+
+        #### Fourth training session: 2024-09-10 23:25:58 (stats/ts-2-1-1-4.csv)
+        The agent learns very quickly to avoid invalid actions and also relatively quickly not to wait for the optimal policy.
+
+    ################## Variant 2.1.2
+
+    The model doesn't seem to converge reliably to an optimal policy, so we will try using more aggressive rewards for walking 
+    and waiting.
+
+        e.INVALID_ACTION: -1,
+        e.MOVED_LEFT: 0.1,
+        e.MOVED_RIGHT: 0.1,
+        e.MOVED_UP: 0.1,
+        e.MOVED_DOWN: 0.1,
+        e.WAITED: -0.2,
+
+    ---------> Results: 
+        #### First training session: 2024-09-11 10:03:42 (stats/ts-2-1-2-1.csv)
+
+        With these aggressive rewards, the agent seems to very quickly converge to the optimal policy, it neither waits much nor 
+        performs invalid actions. A replay shows as expected, that the agent flips between one tile and the next, as it has no 
+        incentive to explore.
+
+        We delete the model (models/2-1-2-1.pt) and begin again.
+        
+        #### Second training session: 2024-09-11 10:23:20 (stats/ts-2-1-2-2.csv)
+
+        A similar behavior is shown as in the first session, showing a quick convergence to the optimal solution. It could be, 
+        that, at least initially, higher rewards / punishments for movement and waiting make it learn the optimal policy more 
+        reliably.
+
+        We delete the model (models/2-1-2-2.pt) and begin again.
+
+        #### Third training session: 2024-09-11 10:23:15 (stats/ts-2-1-2-3.csv)
+
+        As the model seems to converge quicker, we reduce the number of training rounds. While dqn_v1 struggles to converge to an optimal 
+        optimal policy, dqn_v2 shows the same steep convergence to the optimal policy.
+
+        We delete the model (models/2-1-2-3.pt) and begin again.
+
+        #### Fourth training session: 2024-09-11 15:18:30 (stats/ts-2-1-2-4.csv)
+
+        dqn_v2 shows in most cases a consistent learning behavior and converges to the optimal solution within few iterations of the game.
+        Additionally, more aggressive rewards and punishments for movement and waiting make it converge more reliably, although even with
+        a sparse reward system it managed to perform good as well.
+
+        The version we keep for the next steps is:
+
+        rewards:
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+
+        feature:
+
+            ################## Variant 2.1.1
+            def get_neighboring_tiles(own_position, game_state):
+
+                field = game_state['field']
+                x, y = own_position
+                rows, cols = field.shape
+
+                tile_up = 1 if field[x][y - 1] == 0 else 0
+                tile_down = 1 if field[x][y + 1] == 0 else 0
+                tile_right = 1 if field[x + 1][y] == 0 else 0
+                tile_left = 1 if field[x - 1][y] == 0 else 0
+
+                neighboring_tiles = [tile_up, tile_right, tile_down, tile_left]
+
+                return neighboring_tiles
+
+
+################## Variant 2.2
+
+On Phase 2: We want to teach the agent how to avoid walking into bombs it placed itself. So, the agent Should
+have access to features that inform it about the explosion map and the impending danger after bombs. Likewise,
+we will adjust the rewards to reinforce this behavior.
+
+    ################## Variant 2.2.1
+
+    We will try to incorporate the information about whether or not a bomb is going to explode into the same 4 (+1) 
+    features of neighboring_tiles. By including the information of the type of tile it is with the minus sign, we hope 
+    that the agent can learn the same behaviors with less features.
+
+    ---------> Results: 
+        #### First training session: 2024-09-11 10:03:42 (stats/ts-2-1-2-1.csv)
+
+        #### Second training session: 2024-09-11 20:50:17 (stats/ts-2-2-1-2.csv)
+
+        dqn_v2 learns not to kill itself quite quickly, but it is still waiting most of the time. It points towards a good
+        direction, but we want it to learn to place bombs AND avoid them. We will boost the rewards for placing a bomb.
+
+        We delete the model (models/2-2-1-2.pt) and begin again.
+
+        #### Third training session: 2024-09-11 21:05:39 (stats/ts-1-2-1-3.csv)
+
+        Still no learning after 3000 iterations. Kills self immediately. 
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: 0.5,
+            e.SURVIVED_ROUND: 5
+
+        #### Fourth training session: 2024-09-11 21:05:39 (stats/ts-1-2-1-4.csv)
+
+        We try with more aggressive rewards for surviving the round and offing itself.
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+            e.KILLED_SELF: -50,
+            e.BOMB_DROPPED: 5,
+            e.SURVIVED_ROUND: 50
+
+        The Loss is exploding, so we will reduce the learning rate in the next session.
+
+        #### Fifth training session: xx (stats/ts-2-2-1-5.csv)
+
+        LEARNING_RATE = 0.1 -> 0.01
+
+        The loss continues growing exponentially. After a certain point, the exponential growth stops
+        and instead flattens out. In the gameplay, the agent learns to immediately drop a bomb and kill itself.
+
+        We save the statistics from 2.2.1 in training_stats-2-2-1.csv and begin again
+
+    ################## Variant 2.2.2
+
+    In Variant 2.2.2 we will test out, whether or not clipping the gradient stops it from rising exponentially. 
+    We have decided to keep the features as a concatenation of neighboring_tiles, bomb_features, because otherwise they could
+    potentially be too difficult to learn. We also switch the rewards to
+
+        e.INVALID_ACTION: -5,
+        e.MOVED_LEFT: 1,
+        e.MOVED_RIGHT: 1,
+        e.MOVED_UP: 1,
+        e.MOVED_DOWN: 1,
+        e.WAITED: -2,
+        e.KILLED_SELF: -50,
+        e.BOMB_DROPPED: 5,
+        e.SURVIVED_ROUND: 50
+
+    The conclusion is that we need to change the approach. After many sessions the agent hasn't learned the appropriate
+    behavior and the gradient keeps exploding. 
+
+################## Variant 2.3
+
+Instead of incrementally adding information, we will try to create a more robust feature in the first place. For this, we will 
+create new events to include in the calculation of the reward. 
+
+In general: We want the agent to learn the following things at once:
+
+-> Not die
+-> Collect coins
+-> Destroy crates
+
+    To not die, we include the new events:
+        "COOL", "WARM", "HOT", "BOILING" to describe the danger level of the agent in the current tile.
+        "FRESHENED_UP" describes if the agent moves out of danger.
+    We as well reward and penalize these events appropriately.
+
+    To collect coins, we only include one single feature: using a bfs algorithm to the
+    direction of the next target (coin, crate, later enemy) and include what would be the 
+    next best move: 0, 1, 2, 3 for up, right, down, left or -1 for no valid move. since
+    the algorithm is updated after every move, there is no need to include more information than
+    the next step. 
+
+    We will deal with the destruction of crates in the next update. 
+
+    ################## Variant 2.3.1
+
+    We begin with the following rewards:
+
+        e.INVALID_ACTION: -0.1,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        e.KILLED_SELF: -10,
+        e.BOMB_DROPPED: 0.2,
+        e.SURVIVED_ROUND: 10,
+        e.COIN_COLLECTED: 1,
+        #e.CRATE_DESTROYED: 0.5,
+        # Custom events
+        e.COOL: 0.05,
+        e.WARM: - 0.1,
+        e.HOT: -0.2,
+        e.BOILING: -0.2,
+        e.FRESHENED_UP: 0.2
+
+    and the features we implemented are:
+
+        features = np.concatenate([
+            neighboring_tiles_features, # 4: up, right, down, left
+            bomb_features, # 5: up, right, down, left, here
+            next_move_coin_features, # 1: in which direction does the bfs say we should go for coin
+            #next_move_crate_features, # 1: in which direction does the bfs say we should go for crate
+        ])
+
+    where we determined next_move_coin_features using a bfs algorithm:
+
+        def get_path_bfs(game_state, target_types =['coin', 'crate', 'enemy']):
+            """
+            Using breadth-first-search, we want to determine the shortest path to our target.
+            Since there are walls and crates, this could make it complicated as a feature. 
+            For that reason, only return the next step: up, right, down, left
+            """
+            # dx, dy
+            directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+            direction_names = [0, 1, 2, 3] # up, right, down, left
+
+            # Own position and field
+            field = game_state['field']
+            start_x, start_y = game_state['self'][3]
+
+            rows, cols = field.shape
+            visited = set() # Keep track of tiles already visited
+
+            # BFS queue: stores (x, y, first_move) where first_move is initial direction
+            queue = deque([(start_x, start_y, None)])  
+            visited.add((start_x, start_y))  
+
+            # Get target positions (coins, crates, enemies)
+            targets = []
+            if 'coin' in target_types:
+                targets.extend(game_state['coins'])
+            if 'crate' in target_types:
+                targets.extend((x, y) for x in range(rows) for y in range(cols) if field[x, y] == 1)
+            if 'enemy' in target_types:
+                targets.extend(enemy[3] for enemy in game_state['others'])
+
+            # BFS to find shortest path
+            while queue:
+                x, y, first_move = queue.popleft()
+
+                # Check if reached target
+                if (x, y) in targets:
+
+                    if first_move is not None:
+                        #print(first_move, direction_names)
+                        return [direction_names[first_move]]
+
+                # Explore neighboring tiles
+                for i, (dx, dy) in enumerate(directions):
+                    new_x, new_y = x + dx, y + dy
+
+                    # Check if new position within bounds and not visited
+                    if 0 <= new_x < rows and 0 <= new_y < cols and (new_x, new_y) not in visited:
+                        if field[new_x, new_y] == 0: # Free tile
+                            visited.add((new_x, new_y))
+                            # Enque new position, passing first move
+                            if first_move is None:
+                                queue.append((new_x, new_y, direction_names[i]))
+                            else:
+                                queue.append((new_x, new_y, first_move))
+
+            # Return if no path to target
+            return [-1] # No valid move
+
+    ---------> Results: 
+    #### First training session: 2024-09-15 19:14:33, 2024-09-15 19:23:50, 2024-09-15 19:25:03, 2024-09-15 19:25:30 (stats/ts-2-3-1.csv)
+    Very quickly, the agent learns to collect coins and not kill itself.
+
+    However, the learning takes a wrong turn at some point and the COIN_COLLECTED graph
+    goes from _|^^^\_______ and similarly but contrary the KILLED_SELF graph. It appears 
+    as though at one point the agent decides on a different policy to immediately kill itself
+    before collecting any coins. We believe this is a matter of reward shaping, so we will continue
+    changing and monitoring the rewards.
+
+    The Loss graph grows exponentially.
+    
+    Even this behavior is not consistent. Training on the same features and rewards will yield
+    either this behavior or it will not catch on to the intended training at all.
+
+    #### Second training session: 2024-09-15 19:29:00, 2024-09-15 19:29:48, 2024-09-15 19:30:32,  (stats/ts-2-3-2.csv)
+
+    Before tweaking the rewards, let us try again with an adjusted learning_rate:
+    LEARNING_RATE = 0.0003 -> 0.0001
+
+    Nope, still similar behavior.
+
+    #### Third training session: (stats/ts-2-3-3.csv)
+
+    Let us try again with an adjusted learning_rate:
+    LEARNING_RATE = 0.0001 -> 0.001
+
+    Nope, still similar behavior. 3/4 didn't learn at all, and 1/4 (2-3-3-4) unlearned the behavior.
+
+    #### Fourth training session: (stats/ts-2-3-4.csv)
+
+    Let us try again with an adjusted learning_rate:
+    LEARNING_RATE = 1e-5
+
+    Nope, still similar behavior. 
+
+    #### Fifth training session: (stats/ts-2-3-5.csv)
+
+    Let us try again with an adjusted learning_rate:
+    LEARNING_RATE = 1e-6
+
+    Nope, still similar behavior. 
+
+    #### Sixth training session: (stats/ts-2-3-6.csv)
+
+    Let us try again with an adjusted capacity = 10000 for the ReplayBuffer. This would allow the agent to 
+    learn from a pool of events further in the past
+
+    Nope, still similar behavior. 
+
+    #### Seventh training session: (stats/ts-2-3-7.csv)
+
+    Let us try again with an adjusted capacity = 20000 for the ReplayBuffer. This would allow the agent to 
+    learn from a pool of events further in the past
+
+    Nope, still similar behavior. 
+
+    #### Eighth training session: (stats/ts-2-3-8.csv)
+
+    We reduced the batch_size = 64 -> 32 to reduce the noise in training.
+
+    With this approach, we achieved the most stable configuration so far (models/2-3-8-2) where the agent 
+    managed to keep the learned behaviors throughout the entire 2000 rounds. 
+
+    However, still inconsistent. Similar behavior as previous attempts.
+
+    #### Ninth training session: (stats/ts-2-3-9.csv)
+
+    Now, let us try to tweak the rewards. It's possible that the rewards are set too high
+    or inconsistently.
+
+    Let's try:
+
+        e.INVALID_ACTION: -0.1 -> -0.05,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        e.KILLED_SELF: -10 -> -5,
+        e.BOMB_DROPPED: 0.02 -> 0.05,
+        e.SURVIVED_ROUND: 10 -> 5,
+        e.COIN_COLLECTED: 1,
+        #e.CRATE_DESTROYED: 0.5,
+        # Custom events
+        e.COOL: 0.05,
+        e.WARM: -0.1 -> -0.05,
+        e.HOT: --0.2 -> 0.07,
+        e.BOILING: -0.2 -> -0.1,
+        e.FRESHENED_UP: 0.2 -> 0.1
+
+    Nope.
+
+    #### Tenth training session: (stats/ts-2-3-10.csv)
+
+    Now, let us try to tweak the rewards. It's possible that the rewards are set too high
+    or inconsistently.
+
+    Let's try:
+
+        e.INVALID_ACTION: -0.05,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        e.KILLED_SELF: -5,
+        e.BOMB_DROPPED: 0.05,
+        e.SURVIVED_ROUND: 5,
+        e.COIN_COLLECTED: 1,
+        #e.CRATE_DESTROYED: 0.5,
+        # Custom events
+        e.COOL: 0.05 -> 0.01,
+        e.WARM: -0.05 -> -0.02,
+        e.HOT: -0.07 -> -0.05,
+        e.BOILING:-0.1,
+        e.FRESHENED_UP: 0.1
+
+    Nope.
+
+    #### Eleventh training session: (stats/ts-2-3-11.csv)
+
+    Try a more aggressive gradient clipping:
+
+    # Gradient clipping
+    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.5)
+
+    Nope.
+
+    #### Twelfth training session: (stats/ts-2-3-12.csv)
+
+    # callbacks.py
+    self.loss_fn = nn.SmoothL1Loss() # Huber Loss
+
+    The huber loss is supposed to be less sensitive to outliers.
+
+    Nope.
+
+    #### 13th training session: (stats/ts-2-3-13.csv)
+
+    We include in the code a snippet that will automatically save the best performing model:
+
+    in end_of_round():
+
+    # Save best performing model:
+    current_reward = self.stat_logger.total_reward
+    if current_reward > self.best_reward:
+        self.logger.info(f"New best reward: {current_reward}. Saving best-model.pt")
+        self.best_reward = current_reward
+        torch.save(self.model.state_dict(), "best-model.pt")
+
+    This will allow us to learn what we need to learn without worrying too much about unlearning.
+
+
+    During this training round, we achieved an agent that performs COIN_COLLECTION nearly perfectly, but hasn't 
+    quite mastered not dying. It manages to survive roughly 50% of the time and I believe only manages so
+    because it randomly avoids the bombs by having such a tight focus on the coins, that it's automatically
+    led away from the explosion range. During the first session (2024-09-17 10:45:16), the agent didn't unlearn the expected behavior.
+    The first thing we'll do is have it train for another 2000 rounds to see if this remains the case.
+
+    Indeed, it was not a stable optimum. After an additional 1000 rounds it unlearns the behaviors, the loss diverges,
+    and it begins killing itself within the first moves.
+
+    We save the best performing model (bm-2-3-13-1) and the final model (2-3-13-1).
+
+    In the game play, the best performing model seamlessly gathers every coin in a very effcient route.
+    The final (unlearned) model exclusively waits. Does not drop bombs nor moves, it just waits until it survives
+    the round to get that reward. 
+
+    #### 14th training session: (stats/ts-2-3-14.csv)
+
+    For the next iteration, let us try reducing the reward for surviving and penalize waiting again,
+    additionally, let us remove the reward for dropping a bomb, to see if this helps the problem of senseless bombing.
+
+        e.INVALID_ACTION: -0.05,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        -> e.WAITED: -0.02,
+        e.KILLED_SELF: -5,
+        #e.BOMB_DROPPED: 0.05,
+        e.SURVIVED_ROUND: 5 -> 4,
+        e.COIN_COLLECTED: 1,
+        #e.CRATE_DESTROYED: 0.5,
+        # Custom events
+        e.COOL: 0.01,
+        e.WARM: - 0.02,
+        e.HOT: -0.05,
+        e.BOILING: -0.1,
+        e.FRESHENED_UP: 0.1
+
+    Nope, it doesn't. Similar behavior to previous iterations.
+
+################## Variant 2.4
+
+So, we can't currently solve the convergence issue and the unlearning. Maybe it's because the game is currently not balanced properly.
+Let us try simultaneously adding crate features, such that it learns to destroy crates, hopefully this way it will learn to avoid bombs.
+
+    ################## Variant 2.4.1
+
+    Crate features: Similarly to coins, we want to determine where the next crate is, but in this case, we can't actually walk on 
+    the tile of the crate itself, so it will not work with our current path-finding algorithm
+
+    ---------> Results: 
+        #### First training session: (stats/ts-2-4-1.csv)

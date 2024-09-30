@@ -1,0 +1,258 @@
+Documentation for Variant One of the DQN:
+
+In an elimination type matchup, we will select different features and train them on Variant One and Variant Two.
+The features which lead to the best learned behavior will move on to the next stage of training.
+
+################## Variant 1.1
+
+On Phase 1: We want to teach the agent to walk and to avoid walking directly into walls. Therefore, we need to provide 
+it with knowledge about the immediate neighboring walls and punish it for performing invalid actions. We will monitor the 
+amount of Invalid Actions the agent performs with consecutive training iterations. For this first stage, we remove 'BOMB'
+from the possible actions, to avoid having that as an Invalid Action.
+
+    ################## Variant 1.1.1
+
+    The features vector is a four dimensional vector which includes the state of the tiles up, right, down and left 
+    from the current agent position. As game_state['field'] indicates, free fields are marked by 0, walls by -1, crates by +1.
+
+    In the first variant, we will punish Invalid Action with -1 and reward any kind of movement with 0.02, so that the agent 
+    learns to explore. We will need to take precaution with rewarding movement, as we don't want to train the agent to explore 
+    recklessly in the future. We will also punish waiting with -0.1 to keep the agent from staying in the same tile throughout
+    the game.
+
+    To train the agent, we created a custom scenario 
+
+        "mostly-empty": {
+        "CRATE_DENSITY": 0.2,
+        "COIN_COUNT": 0
+        }
+
+    to account for crates, but also permit somewhat free exploration.
+
+    The rewards are set as:
+
+        e.INVALID_ACTION: -1,
+        e.MOVED_LEFT: 0.02,
+        e.MOVED_RIGHT: 0.02,
+        e.MOVED_UP: 0.02,
+        e.MOVED_DOWN: 0.02,
+        e.WAITED: -0.05,
+
+    ---------> Results: 
+        Agent seems to convert to a strategy where it doesn't try going into walls, however, it gets stuck in a loop of
+        right-left or up-down, since it doesn't have any incentive to explore.
+
+
+        #### First training session: 2024-09-10 21:41:41 (stats/ts-1-1-1-1.csv)
+        dqn_variant_one appears to converge much slower to the predicted 14.4 invalid moves per round dictated by our 
+        greedy epsilon strategy. After more than 700 training iterations, it has learned not to crash into walls. It also
+        appears to initially learn to WAIT for a much larger time, before also converging on the optimal policy of not
+        waiting
+
+        We delete the model (models/1-1-1-1.pt) and begin again to confirm that this is not an anomaly.
+
+        #### Second training session: 2024-09-10 21:41:41 (stats/ts-1-1-1-2.csv)
+        dqn_v1 appears to initially converge quicker, while dqn_v2 is wildly inconsistent up to 1000 iterations ahead. 
+        The rate at which it performs invalid actions is nevertheless significantly higher than in the first training session.
+        After almost 1000 training rounds, it converges to a suboptimal minimum at approximately 30 Invalid actions per round,
+        which is double that of the expected random chance. After almost 2000 rounds, it seems to reach the optimal policy. We 
+        will train it for 400 rounds more to verify. Indeed it converges.
+
+        After 2000 training rounds, dqn_v1 learns that it is not optimal to wait.
+
+        We delete the model (models/1-1-1-2.pt) and begin again for peace of mind.
+
+        #### Third training session: 2024-09-10 23:04:20 (stats/ts-1-1-1-3.csv)
+        dqn_v1 learns quickly to avoid invalid actions and settles on an optimal policy after 100 rounds of training. However, 
+        it has learned this time to WAIT for every move.
+
+        We delete the model (models/1-1-1-3.pt) and begin again for peace of mind.
+
+        #### Fourth training session: 2024-09-10 23:04 (models/1-1-1-4.pt)
+        At no point does the dqn_v1 learn not to perform invalid movements. It also does not learn not to wait.
+
+        We delete the model (models/1-1-1-4.pt) and begin again
+
+        ################## Variant 2.1.2
+
+    The model doesn't seem to converge reliably to an optimal policy, so we will try using more aggressive rewards for walking 
+    and waiting.
+
+        e.INVALID_ACTION: -1,
+        e.MOVED_LEFT: 0.1,
+        e.MOVED_RIGHT: 0.1,
+        e.MOVED_UP: 0.1,
+        e.MOVED_DOWN: 0.1,
+        e.WAITED: -0.2,
+
+    ---------> Results: 
+        #### First training session: 2024-09-11 10:03:37 (stats/ts-1-1-2-1.csv)
+
+        With these aggressive rewards, the agent seems to very quickly converge to the optimal policy, it neither waits much nor 
+        performs invalid actions. A replay shows as expected, that the agent flips between one tile and the next, as it has no 
+        incentive to explore.
+
+        We delete the model (models/1-1-2-1.pt) and begin again.
+        
+        #### Second training session: 2024-09-11 10:23:15 (stats/ts-1-1-2-2.csv)
+
+        A similar behavior is shown as in the first session, showing a quick convergence to the optimal solution. It could be, 
+        that, at least initially, higher rewards / punishments for movement and waiting make it learn the optimal policy more 
+        reliably.
+
+        We delete the model (models/1-1-2-2.pt) and begin again.
+
+        #### Third training session: 2024-09-11 10:23:15 (stats/ts-1-1-2-3.csv)
+
+        As the model seems to converge quicker, we reduce the number of training rounds. dqn_v1 struggles to converge to an optimal 
+        optimal policy, despite showing a consistent decline in invalid actions. 
+
+        We delete the model (models/1-1-2-3.pt) and begin again.
+
+        #### Fourth training session: 2024-09-11 15:18:26 (stats/ts-1-1-2-4.csv)
+
+        We conclude that although both methods show a learning behavior and in most cases converge to the optimal policy, 
+        dqn_v1 shows a bigger unpredictability, learning the policy later or not at all during the appropriate training time. 
+        This is not ideal, since by encoding information about the crates surrounding our agent, we could have saved on 
+        features at a later point.
+
+        The version we keep for the next steps is variant two:
+
+        rewards:
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+
+        feature:
+
+            ################## Variant 2.1.1
+            def get_neighboring_tiles(own_position, game_state):
+
+                field = game_state['field']
+                x, y = own_position
+                rows, cols = field.shape
+
+                tile_up = 1 if field[x][y - 1] == 0 else 0
+                tile_down = 1 if field[x][y + 1] == 0 else 0
+                tile_right = 1 if field[x + 1][y] == 0 else 0
+                tile_left = 1 if field[x - 1][y] == 0 else 0
+
+                neighboring_tiles = [tile_up, tile_right, tile_down, tile_left]
+
+                return neighboring_tiles
+
+
+
+################## Variant 1.2
+
+On Phase 2: We want to teach the agent how to avoid walking into bombs it placed itself. So, the agent Should
+have access to features that inform it about the explosion map and the impending danger after bombs. Likewise,
+we will adjust the rewards to reinforce this behavior.
+
+    ################## Variant 1.2.1
+
+    The features vector now includes bomb_features, a set of 5 features which indicates on a scale of 0 to -1 whether 
+    a bomb is going to explode in any immediate tiles or in the one the agent is currently on. 
+
+    ---------> Results: 
+        #### First training session: 2024-09-11 20:31:44 (stats/ts-1-2-1-1.csv)
+
+        We tried an unsupervised approach and set it to train for 6000+ iterations. It immediately learned to kill itself
+
+        rewards
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: 0.2,
+            e.SURVIVED_ROUND: 5        
+
+        We will first learn not to perform invalid actions, without placing bombs, and then see how it fares when it starts placing bombs.
+
+        #### Second training session: 2024-09-11 20:50:17 (stats/ts-1-2-1-2.csv)
+
+        dqn_v1 Still learns to immediately kill itself. 
+
+        We delete the model (models/1-2-1-2.pt) and begin again. We will boost the rewards for placing a bomb.
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: 0.5,
+            e.SURVIVED_ROUND: 5
+
+        #### Third training session: 2024-09-11 21:05:39 (stats/ts-1-2-1-3.csv)
+
+        Still no learning after 3000 iterations. Kills self immediately. 
+
+        #### Fourth training session: 2024-09-11 21:05:39 (stats/ts-1-2-1-4.csv)
+
+        We try with more aggressive rewards for surviving the round and offing itself.
+
+            e.INVALID_ACTION: -1,
+            e.MOVED_LEFT: 0.1,
+            e.MOVED_RIGHT: 0.1,
+            e.MOVED_UP: 0.1,
+            e.MOVED_DOWN: 0.1,
+            e.WAITED: -0.2,
+            e.KILLED_SELF: -50,
+            e.BOMB_DROPPED: 5,
+            e.SURVIVED_ROUND: 50
+
+        The Loss is exploding, so we will reduce the learning rate in the next session.
+
+        #### Fifth training session: 2024-09-11 21:05:39 (stats/ts-1-2-1-5.csv)
+
+        The loss continues growing exponentially. In the gameplay, the agent learns to immediately drop a bomb and kill itself. 
+        At this point, it's also clear due to the training time, that dqn_v1 immediately dies. We will then experiment with a new 
+        strategy. We will implement dqn_v2 and test out different strategies to first fight against the exploding gradient.
+
+        We save the statistics from 2.2.1 in training_stats-1-2-1.csv and begin again
+
+    ################## Variant 1.2.2
+
+    In Variant 1.2.2 we will test out, whether or not modifying the learning rate achieves significant results to fight the exploding
+    gradient. We have decided to keep the features as a concatenation of neighboring_tiles, bomb_features, because otherwise they could
+    potentially be too difficult to learn. We also switch the rewards to
+
+        e.INVALID_ACTION: -5,
+        e.MOVED_LEFT: 1,
+        e.MOVED_RIGHT: 1,
+        e.MOVED_UP: 1,
+        e.MOVED_DOWN: 1,
+        e.WAITED: -2,
+        e.KILLED_SELF: -50,
+        e.BOMB_DROPPED: 5,
+        e.SURVIVED_ROUND: 50
+
+        ---------> Results: 
+            #### First training session: 2024-09-14 15:41:21 (stats/ts-1-2-2-1.csv)
+
+            LEARNING_RATE = 0.01
+
+            Exploding gradient, no learned behaviors
+
+    The conclusion is that we need to change the approach. After many sessions the agent hasn't learned the appropriate
+    behavior and the gradient keeps exploding. 
+
+    ################## Variant 1.2.3
+
+    Instead of incrementally adding information, we will try to create a more robust feature in the first place. For this, we will 
+    create new events to include in the calculation of the reward. 
+
+    "WARM", "HOT", "BOILING" describe the danger level of the agent in the current tile
+
+
+        

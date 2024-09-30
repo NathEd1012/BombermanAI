@@ -1,0 +1,650 @@
+{
+    "by_agent": {
+        "dqn_lapsus_v2_12": {
+            "bombs": 926,
+            "coins": 140,
+            "crates": 1094,
+            "invalid": 808,
+            "kills": 112,
+            "moves": 9265,
+            "rounds": 100,
+            "score": 700,
+            "steps": 11155,
+            "suicides": 68,
+            "time": 17.74559736251831
+        },
+        "peaceful_agent_0": {
+            "coins": 15,
+            "invalid": 3662,
+            "moves": 3824,
+            "rounds": 100,
+            "score": 15,
+            "steps": 7486,
+            "time": 0.22839927673339844
+        },
+        "peaceful_agent_1": {
+            "coins": 16,
+            "invalid": 4789,
+            "moves": 4862,
+            "rounds": 100,
+            "score": 16,
+            "steps": 9651,
+            "time": 0.2481849193572998
+        },
+        "rule_based_agent": {
+            "bombs": 1652,
+            "coins": 1213,
+            "crates": 2075,
+            "invalid": 213,
+            "kills": 113,
+            "moves": 19923,
+            "rounds": 100,
+            "score": 1778,
+            "steps": 21972,
+            "suicides": 14,
+            "time": 15.91961121559143
+        }
+    },
+    "by_round": {
+        "Round 01 (2024-09-22 12-23-12)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 242,
+            "suicides": 1
+        },
+        "Round 02 (2024-09-22 12-23-12)": {
+            "coins": 3,
+            "kills": 3,
+            "steps": 70,
+            "suicides": 1
+        },
+        "Round 03 (2024-09-22 12-23-12)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 184,
+            "suicides": 0
+        },
+        "Round 04 (2024-09-22 12-23-13)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 212,
+            "suicides": 1
+        },
+        "Round 05 (2024-09-22 12-23-13)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 278,
+            "suicides": 1
+        },
+        "Round 06 (2024-09-22 12-23-13)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 262,
+            "suicides": 0
+        },
+        "Round 07 (2024-09-22 12-23-14)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 284,
+            "suicides": 1
+        },
+        "Round 08 (2024-09-22 12-23-14)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 219,
+            "suicides": 1
+        },
+        "Round 09 (2024-09-22 12-23-15)": {
+            "coins": 10,
+            "kills": 3,
+            "steps": 400,
+            "suicides": 0
+        },
+        "Round 10 (2024-09-22 12-23-15)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 272,
+            "suicides": 0
+        },
+        "Round 100 (2024-09-22 12-23-50)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 227,
+            "suicides": 1
+        },
+        "Round 11 (2024-09-22 12-23-16)": {
+            "coins": 8,
+            "kills": 3,
+            "steps": 400,
+            "suicides": 0
+        },
+        "Round 12 (2024-09-22 12-23-16)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 203,
+            "suicides": 1
+        },
+        "Round 13 (2024-09-22 12-23-17)": {
+            "coins": 6,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 14 (2024-09-22 12-23-17)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 263,
+            "suicides": 1
+        },
+        "Round 15 (2024-09-22 12-23-17)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 241,
+            "suicides": 1
+        },
+        "Round 16 (2024-09-22 12-23-18)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 221,
+            "suicides": 1
+        },
+        "Round 17 (2024-09-22 12-23-18)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 229,
+            "suicides": 1
+        },
+        "Round 18 (2024-09-22 12-23-18)": {
+            "coins": 10,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 19 (2024-09-22 12-23-19)": {
+            "coins": 4,
+            "kills": 0,
+            "steps": 400,
+            "suicides": 2
+        },
+        "Round 20 (2024-09-22 12-23-19)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 253,
+            "suicides": 1
+        },
+        "Round 21 (2024-09-22 12-23-19)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 231,
+            "suicides": 1
+        },
+        "Round 22 (2024-09-22 12-23-20)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 364,
+            "suicides": 1
+        },
+        "Round 23 (2024-09-22 12-23-20)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 273,
+            "suicides": 0
+        },
+        "Round 24 (2024-09-22 12-23-21)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 184,
+            "suicides": 1
+        },
+        "Round 25 (2024-09-22 12-23-21)": {
+            "coins": 11,
+            "kills": 3,
+            "steps": 197,
+            "suicides": 1
+        },
+        "Round 26 (2024-09-22 12-23-21)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 231,
+            "suicides": 1
+        },
+        "Round 27 (2024-09-22 12-23-22)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 204,
+            "suicides": 0
+        },
+        "Round 28 (2024-09-22 12-23-22)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 170,
+            "suicides": 1
+        },
+        "Round 29 (2024-09-22 12-23-22)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 204,
+            "suicides": 0
+        },
+        "Round 30 (2024-09-22 12-23-23)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 265,
+            "suicides": 1
+        },
+        "Round 31 (2024-09-22 12-23-23)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 278,
+            "suicides": 1
+        },
+        "Round 32 (2024-09-22 12-23-24)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 192,
+            "suicides": 0
+        },
+        "Round 33 (2024-09-22 12-23-24)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 159,
+            "suicides": 0
+        },
+        "Round 34 (2024-09-22 12-23-24)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 283,
+            "suicides": 1
+        },
+        "Round 35 (2024-09-22 12-23-24)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 229,
+            "suicides": 0
+        },
+        "Round 36 (2024-09-22 12-23-25)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 193,
+            "suicides": 1
+        },
+        "Round 37 (2024-09-22 12-23-25)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 292,
+            "suicides": 1
+        },
+        "Round 38 (2024-09-22 12-23-25)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 258,
+            "suicides": 1
+        },
+        "Round 39 (2024-09-22 12-23-26)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 217,
+            "suicides": 0
+        },
+        "Round 40 (2024-09-22 12-23-26)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 288,
+            "suicides": 1
+        },
+        "Round 41 (2024-09-22 12-23-27)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 236,
+            "suicides": 1
+        },
+        "Round 42 (2024-09-22 12-23-27)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 262,
+            "suicides": 1
+        },
+        "Round 43 (2024-09-22 12-23-27)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 256,
+            "suicides": 1
+        },
+        "Round 44 (2024-09-22 12-23-28)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 302,
+            "suicides": 1
+        },
+        "Round 45 (2024-09-22 12-23-28)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 263,
+            "suicides": 1
+        },
+        "Round 46 (2024-09-22 12-23-28)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 212,
+            "suicides": 1
+        },
+        "Round 47 (2024-09-22 12-23-29)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 365,
+            "suicides": 1
+        },
+        "Round 48 (2024-09-22 12-23-29)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 310,
+            "suicides": 1
+        },
+        "Round 49 (2024-09-22 12-23-30)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 242,
+            "suicides": 0
+        },
+        "Round 50 (2024-09-22 12-23-30)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 263,
+            "suicides": 1
+        },
+        "Round 51 (2024-09-22 12-23-30)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 211,
+            "suicides": 1
+        },
+        "Round 52 (2024-09-22 12-23-31)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 228,
+            "suicides": 0
+        },
+        "Round 53 (2024-09-22 12-23-31)": {
+            "coins": 8,
+            "kills": 2,
+            "steps": 169,
+            "suicides": 2
+        },
+        "Round 54 (2024-09-22 12-23-32)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 284,
+            "suicides": 1
+        },
+        "Round 55 (2024-09-22 12-23-32)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 208,
+            "suicides": 1
+        },
+        "Round 56 (2024-09-22 12-23-32)": {
+            "coins": 7,
+            "kills": 0,
+            "steps": 400,
+            "suicides": 2
+        },
+        "Round 57 (2024-09-22 12-23-32)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 218,
+            "suicides": 0
+        },
+        "Round 58 (2024-09-22 12-23-33)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 269,
+            "suicides": 1
+        },
+        "Round 59 (2024-09-22 12-23-33)": {
+            "coins": 6,
+            "kills": 1,
+            "steps": 400,
+            "suicides": 2
+        },
+        "Round 60 (2024-09-22 12-23-34)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 280,
+            "suicides": 1
+        },
+        "Round 61 (2024-09-22 12-23-34)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 188,
+            "suicides": 1
+        },
+        "Round 62 (2024-09-22 12-23-34)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 195,
+            "suicides": 1
+        },
+        "Round 63 (2024-09-22 12-23-35)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 240,
+            "suicides": 1
+        },
+        "Round 64 (2024-09-22 12-23-35)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 203,
+            "suicides": 1
+        },
+        "Round 65 (2024-09-22 12-23-35)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 202,
+            "suicides": 1
+        },
+        "Round 66 (2024-09-22 12-23-36)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 268,
+            "suicides": 1
+        },
+        "Round 67 (2024-09-22 12-23-36)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 258,
+            "suicides": 1
+        },
+        "Round 68 (2024-09-22 12-23-36)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 217,
+            "suicides": 1
+        },
+        "Round 69 (2024-09-22 12-23-36)": {
+            "coins": 3,
+            "kills": 1,
+            "steps": 400,
+            "suicides": 2
+        },
+        "Round 70 (2024-09-22 12-23-37)": {
+            "coins": 9,
+            "kills": 2,
+            "steps": 203,
+            "suicides": 2
+        },
+        "Round 71 (2024-09-22 12-23-37)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 278,
+            "suicides": 1
+        },
+        "Round 72 (2024-09-22 12-23-37)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 253,
+            "suicides": 1
+        },
+        "Round 73 (2024-09-22 12-23-37)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 221,
+            "suicides": 0
+        },
+        "Round 74 (2024-09-22 12-23-38)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 339,
+            "suicides": 0
+        },
+        "Round 75 (2024-09-22 12-23-38)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 233,
+            "suicides": 0
+        },
+        "Round 76 (2024-09-22 12-23-39)": {
+            "coins": 14,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 77 (2024-09-22 12-23-40)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 253,
+            "suicides": 1
+        },
+        "Round 78 (2024-09-22 12-23-40)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 329,
+            "suicides": 1
+        },
+        "Round 79 (2024-09-22 12-23-41)": {
+            "coins": 13,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 80 (2024-09-22 12-23-41)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 277,
+            "suicides": 1
+        },
+        "Round 81 (2024-09-22 12-23-42)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 225,
+            "suicides": 1
+        },
+        "Round 82 (2024-09-22 12-23-42)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 199,
+            "suicides": 1
+        },
+        "Round 83 (2024-09-22 12-23-43)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 282,
+            "suicides": 1
+        },
+        "Round 84 (2024-09-22 12-23-43)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 246,
+            "suicides": 0
+        },
+        "Round 85 (2024-09-22 12-23-44)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 255,
+            "suicides": 1
+        },
+        "Round 86 (2024-09-22 12-23-44)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 294,
+            "suicides": 0
+        },
+        "Round 87 (2024-09-22 12-23-45)": {
+            "coins": 7,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 88 (2024-09-22 12-23-45)": {
+            "coins": 8,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        },
+        "Round 89 (2024-09-22 12-23-46)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 273,
+            "suicides": 1
+        },
+        "Round 90 (2024-09-22 12-23-46)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 302,
+            "suicides": 1
+        },
+        "Round 91 (2024-09-22 12-23-46)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 193,
+            "suicides": 0
+        },
+        "Round 92 (2024-09-22 12-23-47)": {
+            "coins": 15,
+            "kills": 4,
+            "steps": 172,
+            "suicides": 0
+        },
+        "Round 93 (2024-09-22 12-23-47)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 274,
+            "suicides": 0
+        },
+        "Round 94 (2024-09-22 12-23-47)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 212,
+            "suicides": 1
+        },
+        "Round 95 (2024-09-22 12-23-48)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 289,
+            "suicides": 1
+        },
+        "Round 96 (2024-09-22 12-23-48)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 245,
+            "suicides": 1
+        },
+        "Round 97 (2024-09-22 12-23-49)": {
+            "coins": 15,
+            "kills": 2,
+            "steps": 315,
+            "suicides": 1
+        },
+        "Round 98 (2024-09-22 12-23-49)": {
+            "coins": 15,
+            "kills": 3,
+            "steps": 213,
+            "suicides": 0
+        },
+        "Round 99 (2024-09-22 12-23-49)": {
+            "coins": 12,
+            "kills": 2,
+            "steps": 400,
+            "suicides": 1
+        }
+    }
+}

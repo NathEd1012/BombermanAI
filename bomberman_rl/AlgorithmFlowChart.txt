@@ -1,0 +1,35 @@
+bomberman_rl: python main.py play --my-agent brute_force_agent --train 1 --n-rounds 10
+
+1. main.py -> main()
+
+2. Init. Environment & Agents: main.py -> world_controller()
+
+3. Init. Agents: agents.py -> Agent -> __init__() -> self.setup()
+
+4. Setup Agents: agents.py -> Agent -> setup() -> self.backend.send_event("seutp"), self.backend.get("setup")
+
+    if training:
+        self.backend_send_event("setup_training")
+        Init. Q-table
+
+5. Setup training: train.py -> setup_training()
+
+    Init. logging
+
+6. Game loop: main.py -> world_controller() -> world.new_round()
+
+    7. Agent Action: callbacks.py -> act()
+
+        explore / exploit: epsilon greedy to make random choices sometimes, use q-table most times
+
+    8. Events occurred: train.py -> game_events_occurred() 
+
+        update q-table, log data
+
+    9. End of Round: train.py -> end_of_round()
+
+        save q-table
+
+    10. Repeat loop n_rounds
+
+11. End of training: main.py -> world_controller() -> world.end()

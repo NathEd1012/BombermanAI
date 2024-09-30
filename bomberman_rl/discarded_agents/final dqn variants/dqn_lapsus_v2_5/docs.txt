@@ -1,0 +1,380 @@
+Documentation for dqn_lapsus_v1:
+
+In the first round, we want to train the agent to collect coins and then later to destroy crates and avoid its bombs:
+
+    ################## Variant 1.1.1
+
+        e.INVALID_ACTION: -0.05,
+        e.MOVED_LEFT: 0.01,
+        e.MOVED_RIGHT: 0.01,
+        e.MOVED_UP: 0.01,
+        e.MOVED_DOWN: 0.01,
+        e.WAITED: -0.02,
+        e.KILLED_SELF: -5,
+        # e.BOMB_DROPPED: 0.05,
+        e.SURVIVED_ROUND: 4,
+        e.COIN_COLLECTED: 1,
+        e.CRATE_DESTROYED: 0.3,
+        # Custom events
+        e.COOL: 0.01,
+        e.WARM: -0.02,
+        e.HOT: -0.05,
+        e.BOILING: -0.1,
+        e.FRESHENED_UP: 0.1
+    
+    ---------> Results: 
+        
+        #### First training session: (stats/ts-1-1-1.csv)
+
+        The model was initially trained on 500 rounds of coin-heaven. The model learns consistently within 100+ rounds to gather all possible coins. In the play scenario, it always gathers all coins. The agent hasn't learned to
+        survive bombs yet, it does mostly so by accident because it's so eager to move on to the next coin that it avoids the explosion. When there's a coin and in its
+        path the explosion it blows itself up.
+
+        After succesfully training it to gather coins, we started training on scenario loot-crate (500-9000). With the current reward system, it shows a slow improvement
+        at destroying crates and has somewhat succesfully learned to place bombs and then run away from them. During play it can be seen performing
+        the characteristic L to avoid the bombs it places.
+
+        However, it seems that the agent learned some unwanted behaviors. Particularly, due to there being rewards for simultaneously placing bombs and
+        also running out of danger, it often gets stuck in a loop where it will place a bomb, avoid it, and then place a bomb again. Moving on the same
+        L. 
+
+        Playing again on the scenario coin-heaven shows that the agent has unlearned many of the initial efficient pathfinding skills. It has learned that placing bombs is good,
+        but is not as interested in getting the coins as much. It routinely kills itself accidentally after just a few coins. We tried re-training it on coin-heaven (9000-9500), 
+        which leads it to both place a lot of bombs, avoid them succesfully and gather all the coins (in most cases). However, going back to loot-crate confuses the agent entirely.
+        Removing a large part of the randomness, by training 500 rounds (9500-10000) with EPSILON = 0.1 -> 0.01 indicates that it mastered again to collect coins, but not drop any bombs.
+
+        From these insights, we have some ideas on how to improve the next version.
+
+    ################## Variant 1.2.1
+
+        #### First training session: (stats/ts-1-2-1.csv)
+
+            First: We need to introduce a penalty for bad bomb placement. If the agent places a bomb which doesn't break any crates
+            it should be penalized.
+
+            Second: We need to change the rewards to make the bomb-placement-escape unsuitable as a strategy.
+
+            Third: We need to adjust the learning, so that the agent can act flexibly independent of the scenario: It could first learn to search for coins,
+            then to destroy crates, but it should be able to go back towards a coin-only scenario.
+
+        After training the agent for 2000 rounds (coin-heaven), it has learned, as expected, to perfectly gather the coins and to not die, at least not on purpose.
+        It has also no problem adapting to scenarios where the coins are spread thinner:
+
+            "coin-slightly-less-heaven": {
+                "CRATE_DENSITY": 0,
+                "COIN_COUNT": 9
+            }
+
+        #### Second training session: (stats/-----)
+
+        With the new rewards:
+
+            e.INVALID_ACTION: -0.05,
+            e.MOVED_LEFT: -0.01,
+            e.MOVED_RIGHT: -0.01,
+            e.MOVED_UP: -0.01,
+            e.MOVED_DOWN: -0.01,
+            e.WAITED: -0.02,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: -0.05,
+            e.USELESS_BOMB: -0.2,
+            e.CRATE_COMBO: 0.5,
+            e.COIN_FOUND: 0.2,
+            e.SURVIVED_ROUND: 5,
+            e.COIN_COLLECTED: 1,
+            e.CRATE_DESTROYED: 0.3,
+            # Custom events
+            e.WARM: - 0.05,
+            e.HOT: -0.05,
+            e.BOILING: -0.05,
+            e.FRESHENED_UP: 0.05
+
+        We want to penalize movement, balance out bomb placement (placing a bomb means bein WARM, which gives the same penalty as the 
+        FRESHENED_UP reward, so they cancel out). Therefore, it should ideally not learn to get stuck in the bomb-placement-escape loop.
+        We also don't want it to place bombs stupidly, so we penalize bomb_placement in general, particularly useless bombs and also reward an extra
+        0.5 points for breaking many (3+) bombs at once.
+
+        The coin-collecting agent is saved in coin-heaven-1-1-1.pt and we move on with training. We will from here on perform different approaches to training:
+        First, we will directly train the agent with the next scenario: loot-crate. In dqn_lapsus_v2, we will train the agent from scratch but already in an
+        environment with sufficient crates.
+
+        Within the first 1000 training games, the agent is learning to break crates and avoid bombs, mostly. It shows a steady increase in average 
+        crates destroyed to approximately 12 every game. Behaviors such as not dropping useless bombs or making crate combos have not been internalized yet.
+        The amount of useless bombs is nearly 100% so far, being almost identically distributed to the action "BOMB". Let us train it now for 10000 games and see
+        if brute force alone is enough to make it learn something useful.
+
+        A bug in our code reveals, that every bomb is a useless bomb because the statement 0: False, not useless; 1: True, useless, is hidden in a list
+        which means that it always returns True.
+
+        #### Third training session: (stats/ts-2-2-1.csv)
+
+        With the bug fixed, we let the agent train again. This time we train it on scenario loot-crate, such that it's more evident why there is supposed 
+        to be a reward for breaking bombs. Now that this is fixed, the agent learns to drop drastically less useless bombs. More complicated events such as 
+        crate combo are still rare and haven't been learned. However, in the playthrough at merely 1700 training games, the agent shows an understanding for
+        avoiding bombs and delaying the pursuit of coins (most times) until it is safe to do so. 
+
+        However, the agent seems to stop after destroying around 10-15 crates and it plateaus. Another behavior that we can see is that it over-prioritizes 
+        bomb dropping, to an extent where it won't pursue a coin before dropping a bomb. Let us try by penalizing bomb dropping a little further.
+
+    ################## Variant 2.2.2
+
+            e.INVALID_ACTION: -0.05,
+            e.MOVED_LEFT: -0.01,
+            e.MOVED_RIGHT: -0.01,
+            e.MOVED_UP: -0.01,
+            e.MOVED_DOWN: -0.01,
+            e.WAITED: -0.02,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: -0.1,
+            e.USELESS_BOMB: -0.2,
+            e.CRATE_COMBO: 1,
+            e.COIN_FOUND: 0.4,
+            e.SURVIVED_ROUND: 5,
+            e.COIN_COLLECTED: 1,
+            e.CRATE_DESTROYED: 0.5,
+            # Custom events
+            #e.COOL: 0.01,
+            e.WARM: - 0.05,
+            e.HOT: -0.05,
+            e.BOILING: -0.05,
+            e.FRESHENED_UP: 0.05
+
+        We as well increased the rewards for destroying crates and achieving a crate_combo is still a difficult task that it hasn't learned.
+        It does learn not to place stupid bombs, but at a certain point it doesn't break any crates, it stabilizes at around 12-15. 
+
+        We try first increasing the batch_size = 32 -> 64. This did not help the case. 
+
+    ################## Variant 2.2.3    
+
+        Weird stuff, weird stuff. The agent learns to walk less, the Steps stat showing a decrease, while simultaneously breaking as many crates.
+        This can be explained possibly by the rewards, which penalize walking. However, this would mean a conscious decision of the agent to kill itself.
+
+        Let us try with some new features and events:
+
+        feature: can_place_bomb ? 
+
+        events: CRATES_POTENTIALLY_DESTROYED
+
+        We do this to avoid the time delay of placing a bomb. The agent seems to perform significantly better, but still plateauing at around 20-25 crates.
+
+        Other notable things: At first more steps = good, then it reduces them despite having included a reward for step survived.
+
+        ts-2-2-6.csv, 2-2-6.pt
+
+################## Variant 2.2.4
+
+        We include in the path finding algorithm a clause so that it only returns the next move if it's not currently blocked by an 
+        imminent explosion. No noticeable improvement wrt to 2.2.3. 
+
+        Let us change the training scenario to mostly-empty with
+
+            "mostly-empty": {
+                "CRATE_DENSITY": 0.15,
+                "COIN_COUNT": 9
+            }
+
+        This should allow it to explode enough crates to survive until the end of the round. We train it for 10000 iterations here. These are
+        still too many crates and it doesn't yet manage to survive the entire round. 
+
+        In the next step, we will use scenario:
+
+            "almost-empty": {
+                "CRATE_DENSITY": 0.05,
+                "COIN_COUNT": 4
+            }
+
+        to ensure that it gets that sweet reward of surviving a round.
+
+        Sometimes the agent gets confused and doesn't know what to do, particularly when there is more than one target simultaneously.
+
+
+        Now that it's training (1000 times) on almost empty, it appears to be surviving more frequently (0.5). 
+
+################## Variant 2.3.1
+
+    Ok start playing with epsilons and learning rates. First attempt ts-1-3-1.csv and ts-2-3-1.csv show a slightly better result for the lower training rate 0.0001 instead of 
+    0.001.
+
+    2.3.2:
+
+    Introduce epsilon greedy update that starts at 1 and ends at 0.025 after 5000 rounds. It appears to learn significantly worse with an epsilon policy
+    starting at 1.
+
+    We perform two tests:
+
+    dqn_lapsus_v1 starts at 0.5 and then decays to 0.01 after 5000 iterations. This shows significantly worse results (ts-1-3-3.csv) then starting
+    at 0.1 and then decreasing to 0.01 (ts-2-3-3.csv)
+
+    Now we train v2 further but increasing the crate-density
+
+    In the first 6000 trainings, this appears to work ok. Since the epsilon policy is still being updated it takes a while for it to really
+    get into it, but it shows signs for improvement. For the next 6000 rounds we set initial epsilon = 0.01 so that it prioritizes exploitation and it
+    appears to be doing better, surviving approx 50%, but then it unlearns this behavior.
+
+    Other notable behaviors are: ignoring coins. Since it currently is rewarded for surviving, it just avoids coins and walks around during 
+    the end stage.
+
+    The current rewards are:
+
+            e.INVALID_ACTION: -0.1,
+            e.MOVED_LEFT: -0.01,
+            e.MOVED_RIGHT: -0.01,
+            e.MOVED_UP: -0.01,
+            e.MOVED_DOWN: -0.01,
+            e.WAITED: -0.02,
+            e.KILLED_SELF: -5,
+            e.BOMB_DROPPED: -0.1,
+            e.USELESS_BOMB: -0.2,
+            e.CRATE_COMBO: 1,
+            e.COIN_FOUND: 0.4,
+            e.SURVIVED_ROUND: 5,
+            e.COIN_COLLECTED: 1,
+            e.CRATE_POTENTIALLY_DESTROYED: 0.5,
+            #e.CRATE_DESTROYED: 0.5,
+            # Custom events
+            #e.COOL: 0.01,
+            e.WARM: - 0.05,
+            e.HOT: -0.05,
+            e.BOILING: -0.05,
+            e.FRESHENED_UP: 0.05,
+            e.STEP_SURVIVED: 0.01
+
+    The statistics show behaviors:
+
+    1. It slowly learns to survive_round, until it realizes that it doesn't need to in order to achieve a similar amount of rewards.
+    Then 
+
+    ...
+
+    2. It learns that it doesn't need to collect coins, instead idling or looping around. Maybe introduce a feature that penalizes 
+    leaving coins on the board or something.
+
+
+
+    The game play is quite nice, it does fairly well in different scenarios.
+
+    We train progressively increasing the amount of crates. It appears to be able the training quite well.
+
+    Even though the agent is destroying progressively morecrates, it does't mean it survives any longer. On average, the number of steps it takes hasn't 
+    grown since the first rounds.
+
+    -----------
+
+    v2_2:
+
+    In this version, we let the agent train overnight. Let's see how well it performs.
+
+    It routinely beats the model that only trained +- 20000 times, this one trained +- 140000 times. Its chances of survival are still not that great
+    when we consider the entire round, but it performs significantly more steps per game and rapidly adapts as well to other csenarios.
+
+    Let's save this model and copy it to v2_3 to train further while I work.
+
+    --
+
+    in v2_3 (here) we trained the agent on +-90000 extra runs on loot-crate. It performs very good, but still has some features that are buggy.
+
+    Particularly, it still kills itself sometimes, and also at the end it stops looking for coins and instead runs around in circles placing bombs.
+
+    To avoid the killing itself part, maybe we have to update danger_map, because it doesn't account for the bombs remaining one tick longer.
+
+    In the play view, v2_2 appears to play better consistently in the mostly-empty scenario, where it has trained 200000 times, but not as well
+    in the loot-crate scenario.
+
+    Tbh, we won't correct these features yet. Let us think about possible attemps to attack enemies. Let's go to v2_4.
+
+    Btw, also fixed crate_combo s.t. >= 3 instead of > 3
+
+--- 
+
+    Hello, we're here in v2_4. Let us get into killing some enemies yall. For that, let's implement first a feature which returns the first_move
+    for the closest enemy and also appropriate rewards for killing opponents.
+
+    Since we're introducing a new feature (at least one), we can't use our current model for training. That means we have to start from scratch.
+
+    Let us concentrate on some different approaches:
+
+    1. v2_4: Introduce enemies slowly, after it's already learned to move in low-crate scenarios
+    2. v2_5: Start with low-crate and peaceful agents already.
+
+    Here, we will first train on crates and then slowly introduce opponents. Nevertheless, we will include the feature for closest enemy
+
+    As rewards, let us consider rewards proportional to the coins.
+
+    Also, we need to account as well for the delay in reward after placing a bomb, so let us include an event for
+    ENEMY_POTENTIALLY_KILLED.
+
+    We also want to reward if we're last man standing. 
+
+        e.INVALID_ACTION: -0.1,
+        e.MOVED_LEFT: -0.01,
+        e.MOVED_RIGHT: -0.01,
+        e.MOVED_UP: -0.01,
+        e.MOVED_DOWN: -0.01,
+        e.WAITED: -0.02,
+        e.KILLED_SELF: -5,
+        e.BOMB_DROPPED: -0.1,
+        e.USELESS_BOMB: -0.3,
+        e.CRATE_COMBO: 0.7,
+        e.COIN_FOUND: 0.4,
+        e.SURVIVED_ROUND: 5,
+        e.COIN_COLLECTED: 1,
+        e.CRATE_POTENTIALLY_DESTROYED: 0.5,
+        e.ENEMY_POTENTIALLY_KILLED: 0.8,
+        e.KILLED_OPPONENT: 5,
+        e.LAST_AGENT_STANDING: 5,
+        #e.CRATE_DESTROYED: 0.5,
+        # Custom events
+        #e.COOL: 0.01,
+        e.WARM: - 0.05,
+        e.HOT: -0.05,
+        e.BOILING: -0.05,
+        e.FRESHENED_UP: 0.02,
+        e.STEP_SURVIVED: 0.01
+
+    --------
+
+    v2_5: Here, we will start training from scratch with peaceful agents in the mix.
+
+    After the first 1000 trainings, with eps(0.1 -> 0.01 w 500 rounds), the agent has adapted quite well to destroying crates
+    and surviving in about 30% of the time. It takes on average 250 steps and doesn't place as many useless bombs.
+
+    It hasn't learned to actively kill opponents, but instead it kills more by virtue of placing more bombs in general. Since the
+    peaceful agents are extremely dumb, they just walk into the bombs.
+
+    Let us train it overnight for 20000 iterations in the same scenario but with a bit more crates:
+
+        "almost-empty": {
+            "CRATE_DENSITY": 0.10,
+            "COIN_COUNT": 8
+        }
+
+    We reset eps(0.1 -> 0.01 w 5000 rounds) 
+
+    On average, the agent takes 300 steps and survives about 60% of the time. He kills on average
+    1 opponnent per round, which we believe is at this point merely coincidental. As the statistics for 
+    "ENEMY_POTENTIALLY_KILLED" show no siginificant learned behavior that makes it drop bombs within range
+    of enemies. The gameplay also shows that the agent is still hyperfocused on destroying crates and collecting coins.
+    He also can't seem to pathfind through enemies, so we need to correct that in the get_path_bfs functions.
+
+    After fixing these bugs, let us also try to improve the agent's focus on enemies. For that we probably need to lower
+    the rewards of crates and enhance the rewards of killing enemies. Maybe we need to include rewards for moving towards 
+    an enemy and the distance to them.
+
+    in model v2_5_1 we saved the current iteration to begin training with the new feature of distance and 
+    updated rewards.
+
+    ########## v2_5_2
+
+    We update the agent with the aforementioned strategies and let it train 30000 in mostly-empty with 3 peaceful
+    agents. The eps policy is at first somewhat exploratory, so the agent appears to be learning slower, but we will check
+    how it does afterwards.
+
+    We had to interrupt training because it had learned only up.
+
+    I believe the extra feature is confusing him, especially since we're not utilizing it. Let us create a new event
+    where we reward it for moving closer to enemies.
+
+    The enemies feature is not working currently, let us see what the problem is. 
+
+    I think it's getting confused when the closest enemy switches between the different ones. Let us train this agent solely on 
+    one enemy.
